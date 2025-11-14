@@ -1,36 +1,157 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Device Simulator Web Application
 
-## Getting Started
+A React-based web application that allows users to interact with and control virtual devices (Light and Fan) in a drag-and-drop sandbox environment.
 
-First, run the development server:
+## 🎯 Features
+
+### Drag-and-Drop Interface
+
+- **Sidebar**: Contains draggable devices (Light, Fan) and saved presets
+- **Testing Canvas**: Droppable workspace where devices can be placed and controlled
+- **Visual Feedback**: Highlighted drop zones and drag states
+
+### Device Controllers
+
+#### 💡 Light Device
+
+- **Power Toggle**: ON/OFF switch
+- **Brightness Slider**: 0-100% control
+- **Color Temperature**: 5 preset options (Warm, Neutral, Cool, Pink, Purple)
+- **Real-time Visualization**: Light appearance changes based on settings
+
+#### 🌀 Fan Device
+
+- **Power Toggle**: ON/OFF switch
+- **Speed Slider**: 0-100% control
+- **Real-time Animation**: Fan rotation speed changes dynamically
+- **Speed Indicators**: Visual feedback for Slow/Medium/Fast speeds
+
+### Preset Management
+
+- **Save Presets**: Save current device configuration with a custom name
+- **Load Presets**: Drag saved presets onto the canvas to restore configurations
+- **Persistent Storage**: All devices and presets are saved to localStorage
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 16 (React 19)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Drag & Drop**: react-dnd with HTML5 backend
+- **State Management**: React Hooks (useState, useEffect)
+- **Storage**: Browser localStorage for persistence
+
+## 📁 Project Structure
+
+```
+ollyo-task/
+├── app/
+│   └── (pages)/
+│       └── page.tsx              # Main application page
+├── components/
+│   ├── simulator/
+│   │   ├── Canvas.tsx            # Droppable canvas component
+│   │   ├── Sidebar.tsx           # Sidebar with devices and presets
+│   │   ├── DeviceLight.tsx       # Light controller component
+│   │   ├── DeviceFan.tsx         # Fan controller component
+│   │   └── Preset.tsx            # Preset item component
+│   └── ui/                       # shadcn/ui components
+├── types/
+│   └── simulator.ts              # TypeScript type definitions
+├── utils/
+│   └── storage.ts                # localStorage utility functions
+└── package.json
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- npm or yarn
+
+### Installation
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📖 How to Use
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Add Devices**: Drag a Light or Fan from the sidebar onto the canvas
+2. **Control Devices**:
+   - Toggle power switches
+   - Adjust brightness/speed with sliders
+   - Change light color temperature
+3. **Save Configuration**: Click "Save" button in the Presets section and enter a name
+4. **Load Preset**: Drag a saved preset from the sidebar onto the canvas
+5. **Remove Devices**: Click the ✕ button on any device controller
 
-## Learn More
+## 🎨 Architecture
 
-To learn more about Next.js, take a look at the following resources:
+### State Management
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Main application state managed in `page.tsx`
+- Device settings passed down as props
+- Callback functions for updates propagated up
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Drag-and-Drop Flow
+
+1. Sidebar items are wrapped with `useDrag` hook
+2. Canvas is wrapped with `useDrop` hook
+3. On drop, callbacks create/restore devices
+4. React state updates trigger re-render
+
+### Data Persistence
+
+- Devices and presets automatically saved to localStorage
+- Data loaded on initial render using lazy initialization
+- Separate storage keys for devices and presets
+
+## 🎯 Features Implemented
+
+✅ Drag-and-drop interface with react-dnd  
+✅ Dynamic device controllers (Light & Fan)  
+✅ Real-time visual updates  
+✅ Power toggles with smooth animations  
+✅ Brightness/Speed sliders  
+✅ Color temperature selection  
+✅ Preset save/load functionality  
+✅ localStorage persistence  
+✅ Responsive design  
+✅ TypeScript type safety  
+✅ Clean, modular component architecture
+
+## 📝 Notes
+
+- This is a frontend-only implementation
+- Backend API integration can be added by replacing localStorage calls
+- Device settings are stored in JSON format for easy serialization
+- The app is fully responsive and works on desktop and tablet devices
+
+## 🔜 Future Enhancements
+
+- Backend API integration (PHP/MySQL)
+- More device types (Thermostat, Smart Plug, etc.)
+- Advanced preset management (edit, delete)
+- Export/Import configurations
+- Multi-room/zone support
+- Device grouping and scenes
+- Scheduling and automation rules
 
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# ollyo-task-Frontend
