@@ -24,9 +24,9 @@ const DeviceFan = ({ settings, onUpdate }: DeviceFanProps) => {
   return (
     <div className="device-fan w-full max-w-2xl">
       {/* Fan Visualization */}
-      <div className="mb-6 h-64 rounded-2xl bg-[#0f1419] flex items-center justify-center relative overflow-hidden border border-gray-700">
+      <div className="mb-2 h-96  flex items-center justify-center relative overflow-hidden">
         {/* Fan blades */}
-        <div className="relative w-40 h-40">
+        <div className="relative w-72 h-72">
           <style jsx>{`
             @keyframes spin {
               from {
@@ -70,7 +70,7 @@ const DeviceFan = ({ settings, onUpdate }: DeviceFanProps) => {
       </div>
 
       {/* Controller Panel */}
-      <div className="bg-[#1a1f26] rounded-2xl p-6 border border-gray-700">
+      <div className="mt-1  bg-[#1a1f26] rounded-2xl p-6 border border-gray-700 shadow-xl max-w-sm mx-auto">
         {/* Power Toggle */}
         <div className="mb-6">
           <label className="flex items-center justify-between">
@@ -92,7 +92,7 @@ const DeviceFan = ({ settings, onUpdate }: DeviceFanProps) => {
 
         {/* Speed Slider */}
         <div>
-          <label className="block mb-3">
+          <label className="block mb-2">
             <span className="text-gray-300 font-medium">Speed</span>
             <span className="text-gray-400 ml-2">{settings.speed}%</span>
           </label>
@@ -103,17 +103,17 @@ const DeviceFan = ({ settings, onUpdate }: DeviceFanProps) => {
             value={settings.speed}
             onChange={handleSpeedChange}
             disabled={!settings.power}
-            className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer disabled:opacity-50
+            className="w-full h-4 bg-gray-700 rounded-lg appearance-none cursor-pointer disabled:opacity-40
               [&::-webkit-slider-thumb]:appearance-none
-              [&::-webkit-slider-thumb]:w-4
-              [&::-webkit-slider-thumb]:h-4
+              [&::-webkit-slider-thumb]:w-5
+              [&::-webkit-slider-thumb]:h-5
               [&::-webkit-slider-thumb]:rounded-full
               [&::-webkit-slider-thumb]:bg-white
-              [&::-moz-range-thumb]:w-4
-              [&::-moz-range-thumb]:h-4
+              [&::-webkit-slider-thumb]:shadow-lg
+              [&::-moz-range-thumb]:w-5
+              [&::-moz-range-thumb]:h-5
               [&::-moz-range-thumb]:rounded-full
-              [&::-moz-range-thumb]:bg-white
-              [&::-moz-range-thumb]:border-0"
+              [&::-moz-range-thumb]:bg-white"
             style={{
               background: settings.power
                 ? `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${settings.speed}%, #374151 ${settings.speed}%, #374151 100%)`

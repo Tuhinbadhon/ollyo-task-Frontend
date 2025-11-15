@@ -1,4 +1,5 @@
 import { Preset } from "@/types/simulator";
+import { LucideFan, LucideLightbulb } from "lucide-react";
 import { useDrag } from "react-dnd";
 
 interface SidebarProps {
@@ -6,13 +7,21 @@ interface SidebarProps {
 }
 
 const DEVICE_TYPES = [
-  { type: "light", label: "Light", icon: "💡" },
-  { type: "fan", label: "Fan", icon: "🌀" },
+  {
+    type: "light",
+    label: "Light",
+    icon: <LucideLightbulb className="text-gray-400" />,
+  },
+  {
+    type: "fan",
+    label: "Fan",
+    icon: <LucideFan className="text-gray-400 " />,
+  },
 ];
 
 const Sidebar = ({ presets }: SidebarProps) => {
   return (
-    <aside className="w-64 bg-[#0f1419] p-6 flex flex-col gap-8 border-r border-gray-700">
+    <aside className="w-64 bg-[#101828] p-6 flex flex-col gap-8 border-r  border-gray-700">
       <div>
         <h2 className="font-semibold mb-4 text-gray-300 text-sm">Devices</h2>
         <div className="flex flex-col gap-2">
@@ -87,15 +96,26 @@ function DraggablePreset({ preset }: { preset: Preset }) {
     }),
   }));
 
+  // Determine icon by first device type in preset
+  let icon = null;
+  if (preset.devices.length > 0) {
+    if (preset.devices[0].type === "light") {
+      icon = <LucideLightbulb className="text-gray-400 mr-2" />;
+    } else if (preset.devices[0].type === "fan") {
+      icon = <LucideFan className="text-gray-400 mr-2" />;
+    }
+  }
+
   return (
     <div
       ref={drag}
-      className={`p-3 rounded-lg cursor-move transition-all ${
+      className={`p-3 rounded-lg cursor-move transition-all flex items-center gap-3 ${
         isDragging
           ? "opacity-50 bg-[#2a3039]"
           : "bg-[#1e252d] hover:bg-[#2a3039]"
       }`}
     >
+      {icon}
       <span className="text-gray-200 text-sm">{preset.name}</span>
     </div>
   );

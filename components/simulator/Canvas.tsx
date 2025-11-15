@@ -8,7 +8,11 @@ interface Device {
   settings: any;
 }
 
-interface CanvasProps {
+interface Preset {
+  devices: Device[];
+  onDropDevice: (type: string) => void;
+  onDropPreset: (preset: Preset) => void;
+  onUpdateDevice: (id: string, settings: any) => void;
   devices: Device[];
   onDropDevice: (type: string) => void;
   onDropPreset: (preset: any) => void;
@@ -43,79 +47,61 @@ const Canvas = ({
   }));
 
   return (
-    <main
-      ref={drop}
-      className={`flex-1 bg-[#0a0e13] p-8 min-h-[600px] flex flex-col items-center justify-center gap-6 border border-gray-700 rounded-xl transition-all relative ${
-        isOver && canDrop ? "ring-2 ring-blue-500/50 bg-[#0f1419]" : ""
-      }`}
-    >
-      <div className="absolute top-6 left-6">
+    <div className=" ">
+      <div className="flex my-5 justify-between items-center">
         <h1 className="text-gray-300 text-lg font-medium">Testing Canvas</h1>
-      </div>
-      <div className="absolute top-6 right-6 flex gap-2">
-        <button
-          onClick={onClearAll}
-          className="px-4 py-2 bg-[#1e252d] hover:bg-[#2a3039] text-gray-300 text-sm rounded-lg border border-gray-700 transition-colors"
-        >
-          Clear
-        </button>
-        <button
-          onClick={onSavePreset}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
-        >
-          Save Preset
-        </button>
-      </div>
-
-      {devices.length === 0 ? (
-        <div className="flex items-center justify-center h-full">
-          <svg
-            width="80"
-            height="80"
-            viewBox="0 0 80 80"
-            fill="none"
-            className="opacity-20"
+        <div className="flex gap-2">
+          <button
+            onClick={onClearAll}
+            className="px-4 py-2 bg-[#1e252d] hover:bg-[#2a3039] text-gray-300 text-sm rounded-lg border border-gray-700 transition-colors"
           >
-            <path
-              d="M40 10 L40 70 M10 40 L70 40"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-gray-600"
-            />
-            <circle
-              cx="40"
-              cy="40"
-              r="15"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-gray-600"
-            />
-          </svg>
+            Clear
+          </button>
+          <button
+            onClick={onSavePreset}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+          >
+            Save Preset
+          </button>
         </div>
-      ) : (
-        <div className="flex flex-wrap gap-6 w-full max-w-5xl">
-          {devices.map((device) =>
-            device.type === "light" ? (
-              <DeviceLight
-                key={device.id}
-                id={device.id}
-                settings={device.settings}
-                onUpdate={(settings) => onUpdateDevice(device.id, settings)}
-                onRemove={() => onRemoveDevice(device.id)}
-              />
-            ) : (
-              <DeviceFan
-                key={device.id}
-                id={device.id}
-                settings={device.settings}
-                onUpdate={(settings) => onUpdateDevice(device.id, settings)}
-                onRemove={() => onRemoveDevice(device.id)}
-              />
-            )
+      </div>
+      <div className="flex-1 bg-[#0a101d]  min-h-[600px] flex flex-col gap-6 border border-gray-700 rounded-xl">
+        <div
+          ref={drop}
+          className={`flex-1 flex items-center justify-center transition-all relative ${
+            isOver && canDrop ? "ring-2 ring-blue-500/50 bg-[#0f1419]" : ""
+          }`}
+        >
+          {devices.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <h2 className="text-gray-600">Drag anything here</h2>
+            </div>
+          ) : (
+            <div className="w-full flex justify-center items-center ">
+              {devices.map((device) =>
+                device.type === "light" ? (
+                  <DeviceLight
+                    key={device.id}
+                    id={device.id}
+                    settings={device.settings}
+                    onUpdate={(settings) => onUpdateDevice(device.id, settings)}
+                    onRemove={() => onRemoveDevice(device.id)}
+                  />
+                ) : (
+                  <DeviceFan
+                    key={device.id}
+                    id={device.id}
+                    settings={device.settings}
+                    onUpdate={(settings) => onUpdateDevice(device.id, settings)}
+                    onRemove={() => onRemoveDevice(device.id)}
+                  />
+                )
+              )}
+            </div>
           )}
         </div>
-      )}
-    </main>
+      </div>
+    </div>
   );
 };
 
