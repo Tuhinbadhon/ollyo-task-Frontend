@@ -1,5 +1,6 @@
 interface DeviceFanProps {
   id: string;
+  name?: string;
   settings: {
     power: boolean;
     speed: number;
@@ -70,6 +71,7 @@ const DeviceFan = ({ settings, onUpdate }: DeviceFanProps) => {
       </div>
 
       {/* Controller Panel */}
+
       <div className="mt-1  bg-[#1a1f26] rounded-2xl p-6 border border-gray-700 shadow-xl max-w-sm mx-auto">
         {/* Power Toggle */}
         <div className="mb-6">

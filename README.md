@@ -30,7 +30,7 @@ A React-based web application that allows users to interact with and control vir
 
 - **Save Presets**: Save current device configuration with a custom name
 - **Load Presets**: Drag saved presets onto the canvas to restore configurations
-- **Persistent Storage**: All devices and presets are saved to localStorage
+- **Persistent Storage**: Devices and presets are persisted via browser localStorage by default
 
 ## 🛠️ Tech Stack
 
@@ -39,7 +39,7 @@ A React-based web application that allows users to interact with and control vir
 - **Styling**: Tailwind CSS
 - **Drag & Drop**: react-dnd with HTML5 backend
 - **State Management**: React Hooks (useState, useEffect)
-- **Storage**: Browser localStorage for persistence
+- **Storage**: Browser localStorage (default)
 
 ## 📁 Project Structure
 
@@ -59,7 +59,7 @@ ollyo-task/
 ├── types/
 │   └── simulator.ts              # TypeScript type definitions
 ├── utils/
-│   └── storage.ts                # localStorage utility functions
+│   └── storage.ts                # backend API helpers for devices & presets
 └── package.json
 ```
 
@@ -114,7 +114,7 @@ npm run dev
 
 ### Data Persistence
 
-- Devices and presets automatically saved to localStorage
+- Devices and presets are loaded via the backend API and persisted on Save Preset
 - Data loaded on initial render using lazy initialization
 - Separate storage keys for devices and presets
 
@@ -127,15 +127,15 @@ npm run dev
 ✅ Brightness/Speed sliders  
 ✅ Color temperature selection  
 ✅ Preset save/load functionality  
-✅ localStorage persistence  
+✅ Backend API persistence  
 ✅ Responsive design  
 ✅ TypeScript type safety  
 ✅ Clean, modular component architecture
 
 ## 📝 Notes
 
-- This is a frontend-only implementation
-- Backend API integration can be added by replacing localStorage calls
+- This is a frontend-only implementation and uses browser-localStorage for persistence by default.
+- The repository includes optional API helpers in `utils/storage.ts` if you want to integrate a backend later; set `API_BASE` accordingly.
 - Device settings are stored in JSON format for easy serialization
 - The app is fully responsive and works on desktop and tablet devices
 
@@ -154,4 +154,5 @@ npm run dev
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
 # ollyo-task-Frontend

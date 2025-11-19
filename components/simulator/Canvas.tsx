@@ -1,22 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Device, Preset } from "@/types/simulator";
 import { useDrop } from "react-dnd";
 import DeviceFan from "./DeviceFan";
 import DeviceLight from "./DeviceLight";
 
-interface Device {
-  id: string;
-  type: string;
-  settings: any;
-}
-
-interface Preset {
+interface CanvasProps {
   devices: Device[];
   onDropDevice: (type: string) => void;
   onDropPreset: (preset: Preset) => void;
-  onUpdateDevice: (id: string, settings: any) => void;
-  devices: Device[];
-  onDropDevice: (type: string) => void;
-  onDropPreset: (preset: any) => void;
-  onUpdateDevice: (id: string, settings: any) => void;
+  onUpdateDevice: (id: string, settings: Device["settings"]) => void;
   onRemoveDevice: (id: string) => void;
   onClearAll: () => void;
   onSavePreset: () => void;
@@ -83,6 +75,7 @@ const Canvas = ({
                   <DeviceLight
                     key={device.id}
                     id={device.id}
+                    name={device.name}
                     settings={device.settings}
                     onUpdate={(settings) => onUpdateDevice(device.id, settings)}
                     onRemove={() => onRemoveDevice(device.id)}
@@ -91,6 +84,7 @@ const Canvas = ({
                   <DeviceFan
                     key={device.id}
                     id={device.id}
+                    name={device.name}
                     settings={device.settings}
                     onUpdate={(settings) => onUpdateDevice(device.id, settings)}
                     onRemove={() => onRemoveDevice(device.id)}

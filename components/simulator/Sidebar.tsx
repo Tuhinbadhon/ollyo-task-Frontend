@@ -20,6 +20,9 @@ const DEVICE_TYPES = [
 ];
 
 const Sidebar = ({ presets }: SidebarProps) => {
+  // Ensure presets is always an array to avoid runtime errors
+  const safePresets = Array.isArray(presets) ? presets : [];
+
   return (
     <aside className="w-64 bg-[#101828] p-6 flex flex-col gap-8 border-r  border-gray-700">
       <div>
@@ -40,12 +43,12 @@ const Sidebar = ({ presets }: SidebarProps) => {
           <h2 className="font-semibold text-gray-300 text-sm">Saved Presets</h2>
         </div>
         <div className="flex flex-col gap-2">
-          {presets.length === 0 ? (
+          {safePresets.length === 0 ? (
             <div className="text-gray-500 text-sm p-3 bg-[#1a1f26] rounded-lg">
               Nothing added yet
             </div>
           ) : (
-            presets.map((preset) => (
+            safePresets.map((preset) => (
               <DraggablePreset key={preset.id} preset={preset} />
             ))
           )}

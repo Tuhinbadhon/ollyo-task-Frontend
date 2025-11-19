@@ -3,6 +3,7 @@ import React from "react";
 
 interface DeviceLightProps {
   id: string;
+  name?: string;
   settings: {
     power: boolean;
     brightness: number;
@@ -83,6 +84,7 @@ const DeviceLight = ({ settings, onUpdate }: DeviceLightProps) => {
       </div>
 
       {/* Controller Panel */}
+
       <div className="mt-1  bg-linear-to-br from-[#1a1f26] to-[#141921] rounded-2xl p-6 border border-gray-700 shadow-2xl space-y-2 relative z-30">
         {/* Power Toggle */}
         <div className="flex items-center justify-between">

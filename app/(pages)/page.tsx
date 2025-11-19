@@ -2,38 +2,41 @@
 
 import { Modal } from "@/components/ui/modal";
 import { Device, Preset } from "@/types/simulator";
-import {
-  loadDevices,
-  loadPresets,
-  saveDevices,
-  savePresets,
-} from "@/utils/storage";
+import { loadDevices, loadPresets, savePreset } from "@/utils/storage";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import toast, { Toaster } from "react-hot-toast";
 import Canvas from "../../components/simulator/Canvas";
 import Sidebar from "../../components/simulator/Sidebar";
-import toast, { Toaster } from "react-hot-toast";
 
 export default function Page() {
-  const [devices, setDevices] = useState<Device[]>(() => loadDevices());
-  const [presets, setPresets] = useState<Preset[]>(() => loadPresets());
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [presets, setPresets] = useState<Preset[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [presetName, setPresetName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Save to localStorage when devices change
+  // Load devices and presets from backend when component mounts
   useEffect(() => {
-    saveDevices(devices);
-  }, [devices]);
-
-  // Save to localStorage when presets change
-  useEffect(() => {
-    savePresets(presets);
-  }, [presets]);
+    const load = async () => {
+      try {
+        const [d, p] = await Promise.all([loadDevices(), loadPresets()]);
+        setDevices(d ?? []);
+        setPresets(p ?? []);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load devices/presets from backend");
+      }
+    };
+    load();
+  }, []);
 
   const handleDropDevice = (type: string) => {
+    const now = Date.now();
     const newDevice: Device = {
-      id: `${type}-${Date.now()}`,
+      id: `${type}-${now}`,
+      name: `${type}-${type}-${now}`,
       type: type as "light" | "fan",
       settings:
         type === "light"
@@ -48,17 +51,20 @@ export default function Page() {
     setDevices(
       preset.devices.map((d) => ({
         ...d,
+        serverId: undefined,
         id: `${d.type}-${Date.now()}-${Math.random()}`,
       }))
     );
   };
 
   const handleUpdateDevice = (id: string, settings: Device["settings"]) => {
-    setDevices(devices.map((d) => (d.id === id ? { ...d, settings } : d)));
+    const updated = devices.map((d) => (d.id === id ? { ...d, settings } : d));
+    setDevices(updated);
+    return;
   };
 
   const handleRemoveDevice = (id: string) => {
-    setDevices(devices.filter((d) => d.id !== id));
+    setDevices((prev) => prev.filter((d) => d.id !== id));
   };
 
   const handleClearAll = () => {
@@ -70,7 +76,7 @@ export default function Page() {
     setPresetName("");
   };
 
-  const handleModalConfirm = () => {
+  const handleModalConfirm = async () => {
     if (!presetName || devices.length === 0) return;
     const newPreset: Preset = {
       id: `preset-${Date.now()}`,
@@ -78,9 +84,64 @@ export default function Page() {
       devices: JSON.parse(JSON.stringify(devices)),
     };
     setPresets([...presets, newPreset]);
+    // Persist the preset as-is; we do not create devices separately
+    try {
+      setIsSaving(true);
+      const devicesPayload = devices.map(({ type, name, settings }) => ({
+        type,
+        name,
+        settings,
+      }));
+      const res = await savePreset({
+        name: presetName,
+        devices: devicesPayload,
+      });
+      // Already saved above; devicesPayload and savePreset were called earlier
+      const created = res && res.data ? res.data : res;
+      if (created && created.id) {
+        const mappedDevices = created.devices.map(
+          (d: {
+            id: number;
+            type: "light" | "fan";
+            name?: string;
+            settings: {
+              power: boolean;
+              brightness?: number;
+              color?: string;
+              speed?: number;
+            };
+          }) => ({
+            id: `${d.type}-${d.id}`,
+            serverId: d.id,
+            name: d.name,
+            type: d.type,
+            settings: d.settings,
+          })
+        );
+        const serverPreset: Preset = {
+          id: `preset-${created.id}`,
+          serverId: created.id,
+          name: created.name,
+          devices: mappedDevices,
+        };
+        setPresets((prev) =>
+          prev.map((p) => (p.id === newPreset.id ? serverPreset : p))
+        );
+        // success will be shown once after the block below
+      } else {
+        // nothing special; success shown at the end
+      }
+      toast.success("Preset saved to backend");
+    } catch (err: unknown) {
+      console.error(err);
+      const message =
+        err instanceof Error ? err.message : "Failed to save preset to backend";
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
     setShowModal(false);
     setPresetName("");
-    toast.success("Preset saved");
   };
 
   return (
@@ -137,9 +198,9 @@ export default function Page() {
                 <button
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg w-max font-semibold shadow hover:bg-blue-700 "
                   onClick={handleModalConfirm}
-                  disabled={!presetName}
+                  disabled={!presetName || isSaving}
                 >
-                  Save Preset
+                  {isSaving ? "Saving..." : "Save Preset"}
                 </button>
               </div>
             )
