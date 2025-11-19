@@ -1,19 +1,12 @@
 // Updated DeviceLight Component with fixed z-index, cleaner layout, and improved glow aesthetics
+import { DeviceSettings } from "@/types/simulator";
 import React from "react";
 
 interface DeviceLightProps {
   id: string;
   name?: string;
-  settings: {
-    power: boolean;
-    brightness: number;
-    color: string;
-  };
-  onUpdate: (settings: {
-    power: boolean;
-    brightness: number;
-    color: string;
-  }) => void;
+  settings: DeviceSettings;
+  onUpdate: (settings: DeviceSettings) => void;
   onRemove: () => void;
 }
 
@@ -37,7 +30,9 @@ const DeviceLight = ({ settings, onUpdate }: DeviceLightProps) => {
     onUpdate({ ...settings, color });
   };
 
-  const lightOpacity = settings.power ? settings.brightness / 100 : 0;
+  const brightness = settings.brightness ?? 50;
+  const color = settings.color ?? "#FFFACD";
+  const lightOpacity = settings.power ? brightness / 100 : 0;
 
   return (
     <div className="device-ligh overflow-hiddent w-full max-w-md mx-auto relative p-4">
@@ -72,9 +67,7 @@ const DeviceLight = ({ settings, onUpdate }: DeviceLightProps) => {
             style={{
               transform: "rotate(180deg)",
               filter: settings.power
-                ? `drop-shadow(0 0 ${settings.brightness * 1.5}px ${
-                    settings.color
-                  })`
+                ? `drop-shadow(0 0 ${brightness * 1.5}px ${color})`
                 : "grayscale(100%) brightness(0.5)",
             }}
           >
@@ -131,14 +124,13 @@ const DeviceLight = ({ settings, onUpdate }: DeviceLightProps) => {
         {/* Brightness Slider */}
         <div>
           <label className="block mb-2 text-gray-300 font-medium text-lg">
-            Brightness{" "}
-            <span className="text-gray-400">({settings.brightness}%)</span>
+            Brightness <span className="text-gray-400">({brightness}%)</span>
           </label>
           <input
             type="range"
             min="0"
             max="100"
-            value={settings.brightness}
+            value={brightness}
             onChange={handleBrightnessChange}
             disabled={!settings.power}
             className="w-full h-4 bg-gray-700 rounded-lg appearance-none cursor-pointer disabled:opacity-40
@@ -154,7 +146,7 @@ const DeviceLight = ({ settings, onUpdate }: DeviceLightProps) => {
               [&::-moz-range-thumb]:bg-white"
             style={{
               background: settings.power
-                ? `linear-gradient(to right, ${settings.color} 0%, ${settings.color} ${settings.brightness}%, #374151 ${settings.brightness}%, #374151 100%)`
+                ? `linear-gradient(to right, ${color} 0%, ${color} ${brightness}%, #374151 ${brightness}%, #374151 100%)`
                 : "#374151",
             }}
           />

@@ -9,7 +9,7 @@ import * as React from "react";
 
 interface ModalProps {
   open: boolean;
-  title?: string;
+  title?: React.ReactNode;
   children: React.ReactNode;
   onClose: () => void;
   footer?: React.ReactNode;

@@ -1,5 +1,6 @@
 import { Preset } from "@/types/simulator";
 import { LucideFan, LucideLightbulb } from "lucide-react";
+import * as React from "react";
 import { useDrag } from "react-dnd";
 
 interface SidebarProps {
@@ -65,7 +66,7 @@ function DraggableDevice({
 }: {
   type: string;
   label: string;
-  icon: string;
+  icon: React.ReactNode;
 }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "DEVICE",
@@ -77,7 +78,7 @@ function DraggableDevice({
 
   return (
     <div
-      ref={drag}
+      ref={drag as unknown as React.Ref<HTMLDivElement>}
       className={`p-3 rounded-lg cursor-move transition-all flex items-center gap-3 ${
         isDragging
           ? "opacity-50 bg-[#2a3039]"
@@ -111,7 +112,7 @@ function DraggablePreset({ preset }: { preset: Preset }) {
 
   return (
     <div
-      ref={drag}
+      ref={drag as unknown as React.Ref<HTMLDivElement>}
       className={`p-3 rounded-lg cursor-move transition-all flex items-center gap-3 ${
         isDragging
           ? "opacity-50 bg-[#2a3039]"

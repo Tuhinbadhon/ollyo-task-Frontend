@@ -1,11 +1,10 @@
+import { DeviceSettings } from "@/types/simulator";
+
 interface DeviceFanProps {
   id: string;
   name?: string;
-  settings: {
-    power: boolean;
-    speed: number;
-  };
-  onUpdate: (settings: { power: boolean; speed: number }) => void;
+  settings: DeviceSettings;
+  onUpdate: (settings: DeviceSettings) => void;
   onRemove: () => void;
 }
 
@@ -19,8 +18,8 @@ const DeviceFan = ({ settings, onUpdate }: DeviceFanProps) => {
   };
 
   // Calculate animation duration based on speed (higher speed = faster rotation)
-  const animationDuration =
-    settings.speed > 0 ? `${(101 - settings.speed) / 20}s` : "0s";
+  const speed = settings.speed ?? 50;
+  const animationDuration = speed > 0 ? `${(101 - speed) / 20}s` : "0s";
 
   return (
     <div className="device-fan w-full max-w-2xl">
@@ -43,7 +42,7 @@ const DeviceFan = ({ settings, onUpdate }: DeviceFanProps) => {
             className="w-full h-full"
             style={{
               animation:
-                settings.power && settings.speed > 0
+                settings.power && speed > 0
                   ? `spin ${animationDuration} linear infinite`
                   : "none",
               opacity: settings.power ? 1 : 0.3,
@@ -96,13 +95,13 @@ const DeviceFan = ({ settings, onUpdate }: DeviceFanProps) => {
         <div>
           <label className="block mb-2">
             <span className="text-gray-300 font-medium">Speed</span>
-            <span className="text-gray-400 ml-2">{settings.speed}%</span>
+            <span className="text-gray-400 ml-2">{speed}%</span>
           </label>
           <input
             type="range"
             min="0"
             max="100"
-            value={settings.speed}
+            value={speed}
             onChange={handleSpeedChange}
             disabled={!settings.power}
             className="w-full h-4 bg-gray-700 rounded-lg appearance-none cursor-pointer disabled:opacity-40
@@ -118,7 +117,7 @@ const DeviceFan = ({ settings, onUpdate }: DeviceFanProps) => {
               [&::-moz-range-thumb]:bg-white"
             style={{
               background: settings.power
-                ? `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${settings.speed}%, #374151 ${settings.speed}%, #374151 100%)`
+                ? `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${speed}%, #374151 ${speed}%, #374151 100%)`
                 : "#374151",
             }}
           />

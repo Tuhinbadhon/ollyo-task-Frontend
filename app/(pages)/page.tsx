@@ -126,7 +126,7 @@ export default function Page() {
           devices: devicesPayload,
         });
 
-        console.debug("updatePreset returned:", updated);
+        // console.debug("updatePreset returned:", updated);
 
         const mappedDevices = (updated.devices || devices).map((d: any) => ({
           id: `${d.type}-${d.id ?? Math.random()}`,

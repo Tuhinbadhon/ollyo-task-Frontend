@@ -42,9 +42,13 @@ export const saveDevice = async (device: Device) => {
         return resp2.data && resp2.data.data ? resp2.data.data : resp2.data;
       } catch (err2: unknown) {
         // map axios errors
+        const aerr = err2 as {
+          response?: { data?: Record<string, unknown>; status?: number };
+          message?: string;
+        };
         const message =
-          err2?.response?.data?.message ?? err2?.message ?? String(err2);
-        const status = err2?.response?.status;
+          aerr?.response?.data?.message ?? aerr?.message ?? String(err2);
+        const status = aerr?.response?.status;
         throw new Error(`Failed to save device (status ${status}): ${message}`);
       }
     }
@@ -140,7 +144,7 @@ export const deleteDevice = async (id: string | number) => {
 // Preset APIs
 export const savePreset = async (preset: {
   name: string;
-  devices: Device[];
+  devices: { type: string; name?: string; settings: DeviceSettings }[];
 }) => {
   const payload = preset;
   let res: Response | undefined;
@@ -218,7 +222,7 @@ export const savePreset = async (preset: {
   }
 };
 
-export const updatePreset = async (id: string, payload: any) => {
+export const updatePreset = async (id: string | number, payload: any) => {
   let res: Response;
 
   try {
@@ -282,7 +286,10 @@ export const updatePreset = async (id: string, payload: any) => {
 };
 
 export const savePresets = async (
-  presets: { name: string; devices: Device[] }[]
+  presets: {
+    name: string;
+    devices: { type: string; name?: string; settings: DeviceSettings }[];
+  }[]
 ) => {
   for (const p of presets) await savePreset(p);
 };

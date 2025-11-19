@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Device, Preset } from "@/types/simulator";
+import * as React from "react";
 import { useDrop } from "react-dnd";
 import DeviceFan from "./DeviceFan";
 import DeviceLight from "./DeviceLight";
@@ -59,7 +60,7 @@ const Canvas = ({
       </div>
       <div className="flex-1 bg-[#0a101d]  min-h-[600px] flex flex-col gap-6 border border-gray-700 rounded-xl">
         <div
-          ref={drop}
+          ref={drop as unknown as React.Ref<HTMLDivElement>}
           className={`flex-1 flex items-center justify-center transition-all relative ${
             isOver && canDrop ? "ring-2 ring-blue-500/50 bg-[#0f1419]" : ""
           }`}
