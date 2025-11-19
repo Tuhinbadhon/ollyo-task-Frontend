@@ -34,12 +34,32 @@ A React-based web application that allows users to interact with and control vir
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 16 (React 19)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Drag & Drop**: react-dnd with HTML5 backend
-- **State Management**: React Hooks (useState, useEffect)
-- **Storage**: Browser localStorage (default)
+A concise, clean summary of the technologies used throughout this project — grouped by layer for quick scanning.
+
+### Stack at a glance
+
+| Layer                | Technologies                                                                                                      |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Core                 | **Next.js 16** (App Router) • **React 19** • **TypeScript v5**                                                    |
+| Styling & UI         | **Tailwind CSS v4**, **clsx**, **tailwind-merge**, **lucide-react**, **@radix-ui/react-slot**, **tw-animate-css** |
+| API & Utilities      | **Axios**, **date-fns**, **react-hot-toast**                                                                      |
+| Drag & Drop          | **react-dnd**, **react-dnd-html5-backend**                                                                        |
+| State & Storage      | React Hooks (useState, useEffect) • Browser localStorage                                                          |
+| Developer Experience | ESLint (Next.js configuration), **@types/react**, **@types/react-dom**, **@types/node**                           |
+
+---
+
+### Details & Notes
+
+- Core: Built on Next.js 16 and React 19 for a modern React app with the App Router, server and client components, and optimized builds.
+- Language: TypeScript v5 for type safety and modern TS features.
+- Styling & UI: Tailwind CSS v4 for utility-first styling; `clsx` and `tailwind-merge` help conditionally compose classNames. `lucide-react` provides icons while `@radix-ui/react-slot` simplifies UI composition and component composition patterns. Animations handled with `tw-animate-css`.
+- API & Data Utilities: Axios for HTTP calls, date-fns for date handling, and `react-hot-toast` for lightweight toast notifications.
+- Drag & Drop: User interactions are implemented using `react-dnd` and `react-dnd-html5-backend` for a native-like DnD experience in the browser.
+- State & Storage: Local device state is managed using React hooks (`useState`, `useEffect`) with persistence backed by the browser `localStorage`.
+- Developer Experience: ESLint configured with the Next.js ruleset; type definitions installed for React and Node.
+
+> Tip: The project is intentionally lightweight and designed to be easy to extend — add more devices, store presets on a backend, or integrate features like automation and scheduling.
 
 ## 📁 Project Structure
 
