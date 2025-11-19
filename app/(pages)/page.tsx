@@ -1,8 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Modal } from "@/components/ui/modal";
 import { Device, Preset } from "@/types/simulator";
-import { loadDevices, loadPresets, savePreset } from "@/utils/storage";
+import {
+  loadDevices,
+  loadPresets,
+  savePreset,
+  updatePreset,
+} from "@/utils/storage";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -15,6 +21,10 @@ export default function Page() {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [presetName, setPresetName] = useState("");
+  const [editingPresetServerId, setEditingPresetServerId] = useState<
+    string | number | null
+  >(null);
+  const [shouldUpdateExisting, setShouldUpdateExisting] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   // Load devices and presets from backend when component mounts
@@ -26,7 +36,12 @@ export default function Page() {
         setPresets(p ?? []);
       } catch (err) {
         console.error(err);
-        toast.error("Failed to load devices/presets from backend");
+        // Show the backend error in the toast for clarity
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Failed to load devices/presets from backend";
+        toast.error(message);
       }
     };
     load();
@@ -55,6 +70,10 @@ export default function Page() {
         id: `${d.type}-${Date.now()}-${Math.random()}`,
       }))
     );
+    // Keep track that the user loaded a server preset so that saving will update instead of create
+    setEditingPresetServerId(preset.serverId ?? null);
+    setShouldUpdateExisting(true);
+    setPresetName(preset.name ?? "");
   };
 
   const handleUpdateDevice = (id: string, settings: Device["settings"]) => {
@@ -71,77 +90,157 @@ export default function Page() {
     setDevices([]);
   };
 
+  // Note: debug logs related to preset saving are emitted in the save handler after `devicesPayload` is available
   const handleSavePreset = () => {
     setShowModal(true);
-    setPresetName("");
+    // If we're not editing an existing preset, clear the name; otherwise keep it prefilled
+    if (!editingPresetServerId) setPresetName("");
+    // default update toggle when opening modal
+    if (editingPresetServerId) setShouldUpdateExisting(true);
   };
 
   const handleModalConfirm = async () => {
     if (!presetName || devices.length === 0) return;
-    const newPreset: Preset = {
-      id: `preset-${Date.now()}`,
-      name: presetName,
-      devices: JSON.parse(JSON.stringify(devices)),
-    };
-    setPresets([...presets, newPreset]);
-    // Persist the preset as-is; we do not create devices separately
+
     try {
       setIsSaving(true);
+
       const devicesPayload = devices.map(({ type, name, settings }) => ({
         type,
         name,
         settings,
       }));
-      const res = await savePreset({
-        name: presetName,
-        devices: devicesPayload,
+
+      console.debug("Saving preset", {
+        presetName,
+        devicesPayload,
+        editingPresetServerId,
+        shouldUpdateExisting,
       });
-      // Already saved above; devicesPayload and savePreset were called earlier
-      const created = res && res.data ? res.data : res;
-      if (created && created.id) {
-        const mappedDevices = created.devices.map(
-          (d: {
-            id: number;
-            type: "light" | "fan";
-            name?: string;
-            settings: {
-              power: boolean;
-              brightness?: number;
-              color?: string;
-              speed?: number;
-            };
-          }) => ({
+
+      //   UPDATE EXISTING PRESET
+
+      if (editingPresetServerId && shouldUpdateExisting) {
+        const updated = await updatePreset(editingPresetServerId, {
+          name: presetName,
+          devices: devicesPayload,
+        });
+
+        console.debug("updatePreset returned:", updated);
+
+        const mappedDevices = (updated.devices || devices).map((d: any) => ({
+          id: `${d.type}-${d.id ?? Math.random()}`,
+          serverId: d.id ?? undefined,
+          name: d.name,
+          type: d.type,
+          settings: d.settings,
+        }));
+
+        // Update local list
+        setPresets((prev) =>
+          prev.map((p) =>
+            p.serverId === editingPresetServerId
+              ? {
+                  ...p,
+                  name: updated.name || presetName,
+                  devices: mappedDevices,
+                }
+              : p
+          )
+        );
+
+        // Refresh from backend
+        try {
+          const refreshed = await loadPresets();
+          if (refreshed) setPresets(refreshed);
+
+          const updatedId = updated.id ?? editingPresetServerId;
+          const found = refreshed?.some((p) => p.serverId === updatedId);
+
+          if (!found) {
+            toast.error(
+              "Server did not persist the updated preset. Check backend logs or CORS/auth."
+            );
+          }
+        } catch (err) {
+          console.error("Failed to reload presets after update:", err);
+        }
+      }
+
+      // ==========================
+      //      CREATE NEW PRESET
+      // ==========================
+      else {
+        const newPreset: Preset = {
+          id: `preset-temp-${Date.now()}`,
+          name: presetName,
+          devices: JSON.parse(JSON.stringify(devices)),
+        };
+
+        setPresets((prev) => [...prev, newPreset]);
+
+        const res = await savePreset({
+          name: presetName,
+          devices: devicesPayload,
+        });
+
+        const created = res?.data ?? res;
+
+        if (created?.id) {
+          const mappedDevices = created.devices.map((d: any) => ({
             id: `${d.type}-${d.id}`,
             serverId: d.id,
             name: d.name,
             type: d.type,
             settings: d.settings,
-          })
-        );
-        const serverPreset: Preset = {
-          id: `preset-${created.id}`,
-          serverId: created.id,
-          name: created.name,
-          devices: mappedDevices,
-        };
-        setPresets((prev) =>
-          prev.map((p) => (p.id === newPreset.id ? serverPreset : p))
-        );
-        // success will be shown once after the block below
-      } else {
-        // nothing special; success shown at the end
+          }));
+
+          const serverPreset: Preset = {
+            id: `preset-${created.id}`,
+            serverId: created.id,
+            name: created.name,
+            devices: mappedDevices,
+          };
+
+          // Replace temp preset with server version
+          setPresets((prev) =>
+            prev.map((p) => (p.id === newPreset.id ? serverPreset : p))
+          );
+
+          try {
+            const refreshed = await loadPresets();
+            if (refreshed) setPresets(refreshed);
+
+            if (
+              created.id &&
+              !refreshed?.some((p) => p.serverId === created.id)
+            ) {
+              toast.error(
+                "Server did not persist the created preset. Check backend logs or CORS/auth."
+              );
+            }
+          } catch (err) {
+            console.error("Failed to reload presets after create:", err);
+          }
+        }
       }
-      toast.success("Preset saved to backend");
+
+      // ==========================
+      //        CLEANUP
+      // ==========================
+      setEditingPresetServerId(null);
+      setShouldUpdateExisting(true);
+      toast.success("Preset successfully saved!");
     } catch (err: unknown) {
       console.error(err);
-      const message =
-        err instanceof Error ? err.message : "Failed to save preset to backend";
-      toast.error(message);
+      toast.error(
+        err instanceof Error ? err.message : "Failed to save preset to backend"
+      );
     } finally {
       setIsSaving(false);
+      setShowModal(false);
+      setPresetName("");
     }
-    setShowModal(false);
-    setPresetName("");
   };
 
   return (
@@ -170,7 +269,10 @@ export default function Page() {
               </span>
               <button
                 className="text-gray-400 hover:text-gray-200 text-2xl font-bold ml-2"
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setEditingPresetServerId(null);
+                }}
                 aria-label="Close"
                 tabIndex={0}
               >
@@ -178,12 +280,20 @@ export default function Page() {
               </button>
             </div>
           }
-          onClose={() => setShowModal(false)}
+          onClose={() => {
+            setShowModal(false);
+            setEditingPresetServerId(null);
+            setShouldUpdateExisting(true);
+          }}
           footer={
             devices.length === 0 ? (
               <button
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg w-full font-semibold shadow hover:bg-blue-700 "
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setEditingPresetServerId(null);
+                  setShouldUpdateExisting(true);
+                }}
               >
                 OK
               </button>
@@ -191,7 +301,11 @@ export default function Page() {
               <div className="flex  gap-3">
                 <button
                   className="px-4 py-2 bg-gray-700 text-white rounded-lg w-max  font-semibold shadow hover:bg-gray-800 "
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingPresetServerId(null);
+                    setShouldUpdateExisting(true);
+                  }}
                 >
                   Cancel
                 </button>
@@ -212,6 +326,18 @@ export default function Page() {
             </div>
           ) : (
             <>
+              {editingPresetServerId && (
+                <div className="mb-2 text-sm text-gray-300 flex items-center gap-2">
+                  <input
+                    id="updateExisting"
+                    type="checkbox"
+                    checked={shouldUpdateExisting}
+                    onChange={(e) => setShouldUpdateExisting(e.target.checked)}
+                    className="accent-blue-500"
+                  />
+                  <label htmlFor="updateExisting">Update existing preset</label>
+                </div>
+              )}
               <input
                 type="text"
                 value={presetName}
